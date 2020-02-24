@@ -5,10 +5,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.all('',function(req,res) {
-  const brightspaceEvents = JSON.parse(req.body).Records;
+  console.log(req.headers);
+  console.log(req.body);
+  const brightspaceEvents = req.body.Records;
   console.log(`Successfully received ${brightspaceEvents.length} events.`);
   res.send('OK');
-  process(events);
+  process(brightspaceEvents);
 });
 
 const process = (events) => {
