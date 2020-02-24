@@ -1,0 +1,12 @@
+{
+  "name": "eventstreaming-webhook-client",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "express": "~4.16.1"
+  }
+}

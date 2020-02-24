@@ -1,0 +1,82 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2.1
+
+orbs:
+  slack: circleci/slack@2.2.0
+
+defaults: &defaults
+  docker:
+    - image: circleci/node:8.10
+
+references:
+    setup_credentials: &setup_credentials
+      run: curl -ks -u$ARTIFACTORY_USER:$ARTIFACTORY_PASS "https://d2lartifacts.artifactoryonline.com/d2lartifacts/api/npm/npm-local/auth/d2l" -o .npmrc
+
+    notifications: &notifications
+      only_for_branch: "master"
+      include_project_field: true
+      include_job_number_field: true
+      include_visit_job_action: true
+
+    run_on_master: &run_on_master
+      filters:
+        branches:
+          only: master
+
+jobs:
+
+  build:
+    <<: *defaults
+
+    steps:
+      - checkout
+      - *setup_credentials
+      - run: npm install
+      - persist_to_workspace:
+          root: ../
+          paths: ./*
+      - slack/status:
+          <<: *notifications
+          fail_only: "true"
+
+  test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: npm test
+      - slack/status:
+          <<: *notifications
+          fail_only: "true"
+
+  deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - *setup_credentials
+      - run: npm publish
+      - slack/status:
+          <<: *notifications
+
+workflows:
+  version: 2
+  default:
+    jobs:
+      - build:
+          context: ci-read
+          filters:
+            tags:
+              only: /.*/
+      - test:
+          requires: [build]
+          filters:
+            tags:
+              only: /.*/
+      - deploy:
+          <<: *run_on_master
+          context: ci-write
+          requires: [test]
