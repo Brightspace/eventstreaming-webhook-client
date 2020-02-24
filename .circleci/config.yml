@@ -34,20 +34,10 @@ jobs:
     steps:
       - checkout
       - *setup_credentials
-      - run: npm install
+      - run: npm ci
       - persist_to_workspace:
           root: ../
           paths: ./*
-      - slack/status:
-          <<: *notifications
-          fail_only: "true"
-
-  test:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run: npm test
       - slack/status:
           <<: *notifications
           fail_only: "true"
@@ -71,12 +61,7 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - test:
-          requires: [build]
-          filters:
-            tags:
-              only: /.*/
       - deploy:
           <<: *run_on_master
           context: ci-write
-          requires: [test]
+          requires: [build]
