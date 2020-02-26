@@ -18,7 +18,7 @@ app.all('', function(req,res) {
 	if ( requestHeader !== computedHeader ) {
 		console.log(`Expected ${computedHeader} but received ${requestHeader}`);
 		res.status(400);
-		res.send('Bad request');
+		res.send(`Bad request: Expected ${computedHeader} but received ${requestHeader}`);
 	} else {
 		res.status(200);
 		res.send('OK');
