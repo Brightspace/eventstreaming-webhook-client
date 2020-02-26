@@ -17,12 +17,15 @@ app.all('', function(req,res) {
 	const requestHeader = req.headers['x-brightspace-hmac-sha256'];
 	if ( requestHeader !== computedHeader ) {
 		console.log(`Expected ${computedHeader} but received ${requestHeader}`);
-		throw new Error('Bad request.');
+		res.status(400);
+		res.send('Bad request');
+	} else {
+		res.status(200);
+		res.send('OK');
+		const brightspaceEvents = req.body.Records;
+		console.log(`Successfully received ${brightspaceEvents.length} events.`);
+		process(brightspaceEvents);
 	}
-	res.send('OK');
-	const brightspaceEvents = req.body.Records;
-	console.log(`Successfully received ${brightspaceEvents.length} events.`);
-	process(brightspaceEvents);
 });
 
 const process = (events) => {
